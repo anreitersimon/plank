@@ -24,6 +24,10 @@
 		815A011C1E55100E00017AFB /* MockSchemaLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 815A011B1E55100E00017AFB /* MockSchemaLoader.swift */; };
 		8193AF2E1E66A7E600DEBD13 /* ObjectiveCDebugExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8193AF2D1E66A7E600DEBD13 /* ObjectiveCDebugExtension.swift */; };
 		8193AF301E66A87300DEBD13 /* ObjCFileRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8193AF2F1E66A87300DEBD13 /* ObjCFileRenderer.swift */; };
+		B5FF13671F5B623700986C08 /* SwiftFileGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF13661F5B623700986C08 /* SwiftFileGenerator.swift */; };
+		B5FF13691F5B631800986C08 /* SwiftIR.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF13681F5B631800986C08 /* SwiftIR.swift */; };
+		B5FF136D1F5B637900986C08 /* SwiftModelRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF136C1F5B637900986C08 /* SwiftModelRenderer.swift */; };
+		B5FF136F1F5B63A400986C08 /* SwiftFileRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF136E1F5B63A400986C08 /* SwiftFileRenderer.swift */; };
 		EE11EB4E1ECDEF1400DD6A00 /* ObjectiveCDictionaryExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11EB4D1ECDEF1400DD6A00 /* ObjectiveCDictionaryExtension.swift */; };
 		OBJ_33 /* FileGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* FileGenerator.swift */; };
 		OBJ_34 /* ObjCModelRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* ObjCModelRenderer.swift */; };
@@ -75,6 +79,10 @@
 		815A011B1E55100E00017AFB /* MockSchemaLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockSchemaLoader.swift; sourceTree = "<group>"; };
 		8193AF2D1E66A7E600DEBD13 /* ObjectiveCDebugExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectiveCDebugExtension.swift; sourceTree = "<group>"; };
 		8193AF2F1E66A87300DEBD13 /* ObjCFileRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjCFileRenderer.swift; sourceTree = "<group>"; };
+		B5FF13661F5B623700986C08 /* SwiftFileGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftFileGenerator.swift; sourceTree = "<group>"; };
+		B5FF13681F5B631800986C08 /* SwiftIR.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftIR.swift; sourceTree = "<group>"; };
+		B5FF136C1F5B637900986C08 /* SwiftModelRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftModelRenderer.swift; sourceTree = "<group>"; };
+		B5FF136E1F5B63A400986C08 /* SwiftFileRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftFileRenderer.swift; sourceTree = "<group>"; };
 		EE11EB4D1ECDEF1400DD6A00 /* ObjectiveCDictionaryExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectiveCDictionaryExtension.swift; sourceTree = "<group>"; };
 		OBJ_10 /* ObjCModelRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ObjCModelRenderer.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		OBJ_11 /* ObjectiveCFileGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ObjectiveCFileGenerator.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -208,6 +216,10 @@
 				OBJ_13 /* Schema.swift */,
 				OBJ_14 /* SchemaLoader.swift */,
 				OBJ_15 /* StringExtensions.swift */,
+				B5FF13681F5B631800986C08 /* SwiftIR.swift */,
+				B5FF13661F5B623700986C08 /* SwiftFileGenerator.swift */,
+				B5FF136C1F5B637900986C08 /* SwiftModelRenderer.swift */,
+				B5FF136E1F5B63A400986C08 /* SwiftFileRenderer.swift */,
 			);
 			name = Core;
 			path = Sources/Core;
@@ -326,12 +338,16 @@
 				OBJ_36 /* ObjectiveCIR.swift in Sources */,
 				OBJ_37 /* Schema.swift in Sources */,
 				812A69D41E53D35F006A510E /* ObjectiveCBuilderExtension.swift in Sources */,
+				B5FF13671F5B623700986C08 /* SwiftFileGenerator.swift in Sources */,
 				6948DB341EB6C41700EA902D /* JSADTExtension.swift in Sources */,
+				B5FF136D1F5B637900986C08 /* SwiftModelRenderer.swift in Sources */,
 				OBJ_38 /* SchemaLoader.swift in Sources */,
 				8193AF2E1E66A7E600DEBD13 /* ObjectiveCDebugExtension.swift in Sources */,
 				OBJ_39 /* StringExtensions.swift in Sources */,
 				6948DB2C1EB6A98C00EA902D /* JSIR.swift in Sources */,
 				812A69D01E53D2A1006A510E /* ObjectiveCEqualityExtension.swift in Sources */,
+				B5FF136F1F5B63A400986C08 /* SwiftFileRenderer.swift in Sources */,
+				B5FF13691F5B631800986C08 /* SwiftIR.swift in Sources */,
 				812A69D61E53D44D006A510E /* ObjectiveCNSCodingExtension.swift in Sources */,
 				6948DB321EB6AB2C00EA902D /* JSFileRenderer.swift in Sources */,
 				8193AF301E66A87300DEBD13 /* ObjCFileRenderer.swift in Sources */,

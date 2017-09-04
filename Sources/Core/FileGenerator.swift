@@ -23,6 +23,7 @@ public enum GenerationParameterType {
 public enum Languages: String {
     case objectiveC = "objc"
     case flowtype = "flow"
+    case swift = "swift"
 }
 
 public protocol FileGeneratorManager {
@@ -100,6 +101,8 @@ func generator(forLanguage language: Languages) -> FileGeneratorManager {
         return ObjectiveCFileGenerator()
     case .flowtype:
         return JSFileGenerator()
+    case .swift:
+        return SwiftFileGenerator()
     }
 }
 
@@ -118,12 +121,17 @@ public func writeFile(file: FileGenerator, outputDirectory: URL, generationParam
                            .replacingOccurrences(of: "\t", with: indentSpaces)
                            .appending("\n") // Ensure there is exactly one new line a the end of the file
     do {
+
+        guard let url = URL(string: file.fileName, relativeTo: outputDirectory) else {
+            fatalError("Invalid FileName \(file.fileName)")
+        }
+
         try fileContents.write(
-            to: URL(string: file.fileName, relativeTo: outputDirectory)!,
+            to: url,
             atomically: true,
             encoding: String.Encoding.utf8)
     } catch {
-        assert(false)
+        fatalError("Could not write file \(error)")
     }
 }
 

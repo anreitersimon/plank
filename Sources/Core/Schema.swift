@@ -29,7 +29,25 @@ public enum JSONType: String {
             return JSONType.pointer
         }
 
-        return (prop["type"] as? String).flatMap(JSONType.init)
+        if let type = (prop["type"] as? String).flatMap(JSONType.init) {
+            return type
+        }
+
+        if let types = prop["type"] as? [String] {
+            // infer nullable if types are null and any other type
+            // Example: ["null", "string"]
+            let nonNullTypes = types.filter { $0 != "null" }
+            let nullTypes = types.filter { $0 == "null" }
+
+            guard nonNullTypes.count == 1, nullTypes.count == 1 else {
+                return nil
+            }
+            guard let type = nonNullTypes.first else { return nil }
+
+            return JSONType(rawValue: type)
+        }
+
+        return nil
     }
 }
 
@@ -64,12 +82,28 @@ public struct EnumValue<ValueType> {
 public indirect enum EnumType {
     case integer([EnumValue<Int>]) // TODO: Revisit if we should have default values for integer enums
     case string([EnumValue<String>], defaultValue: EnumValue<String>)
+
+    var rawSwiftType: String {
+        switch self {
+        case .integer:
+            return ": Int"
+        case .string:
+            return ": String"
+        }
+    }
 }
 
 public struct URLSchemaReference: LazySchemaReference {
     let url: URL
     public let force: () -> Schema?
 }
+
+public struct SwaggerSchemaReference: LazySchemaReference {
+    let url: URL
+    let definition: String
+    public let force: () -> Schema?
+}
+
 public protocol LazySchemaReference {
     var force: () -> Schema? { get }
 }
@@ -222,7 +256,9 @@ extension Schema {
 
             switch propType {
             case JSONType.string:
-                if let enumValues = propertyInfo["enum"] as? [JSONObject], let defaultValue = propertyInfo["default"] as? String {
+                if let enumValues = propertyInfo["enum"] as? [JSONObject],
+                    let defaultValue = propertyInfo["default"] as? String {
+
                     let enumVals = enumValues.map { EnumValue<String>(withObject: $0) }
                     let defaultVal = enumVals.first(where: { $0.defaultValue == defaultValue })
                     let maybeEnumVals: [EnumValue<String>]? = .some(enumVals)
@@ -230,7 +266,18 @@ extension Schema {
                         .flatMap { (values: [EnumValue<String>]) in defaultVal.map { ($0, values) } }
                         .map { (defaultVal, enumVals) in
                             Schema.enumT(EnumType.string(enumVals, defaultValue: defaultVal))
-                        }
+                    }
+                } else if let enumValues = propertyInfo["enum"] as? [String],
+                    let defaultValue = propertyInfo["default"] as? String {
+
+                    let enumVals = enumValues.map { EnumValue<String>(defaultValue: $0, description: "") }
+                    let defaultVal = enumVals.first(where: { $0.defaultValue == defaultValue })
+                    let maybeEnumVals: [EnumValue<String>]? = .some(enumVals)
+                    return maybeEnumVals
+                        .flatMap { (values: [EnumValue<String>]) in defaultVal.map { ($0, values) } }
+                        .map { (defaultVal, enumVals) in
+                            Schema.enumT(EnumType.string(enumVals, defaultValue: defaultVal))
+                    }
                 } else {
                     return Schema.string(format: (propertyInfo["format"] as? String).flatMap(StringFormatType.init))
                 }
@@ -256,6 +303,21 @@ extension Schema {
                 }
             case JSONType.object:
                 let requiredProps = Set(propertyInfo["required"] as? [String] ?? [])
+
+                func isOnlyNullAndOther(type: Any) -> Bool {
+                    switch type {
+                    case let types as [String]:
+                        let nonNullTypes = types.filter { $0 != "null" }
+
+                        return nonNullTypes.count == 1
+
+                    case _ as String:
+                        return true
+                    default:
+                        return false
+                    }
+                }
+
                 if let propMap = propertyInfo["properties"] as? JSONObject, let objectTitle = title {
                     // Class
                     let optTuples: [Property?] = propMap.map { (key, value) -> (String, Schema?) in
