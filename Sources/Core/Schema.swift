@@ -19,10 +19,15 @@ public enum JSONType: String {
     case boolean = "boolean"
     case pointer = "$ref" // Used for combining schemas via references.
     case polymorphic = "oneOf" // JSONType composed of other JSONTypes
+    case anyOf = "anyOf" // JSONType composed of other JSONTypes
 
     static func typeFromProperty(prop: JSONObject) -> JSONType? {
         if (prop["oneOf"] as? [JSONObject]) != nil {
             return JSONType.polymorphic
+        }
+        
+        if (prop["anyOf"] as? [JSONObject]) != nil {
+            return JSONType.anyOf
         }
 
         if (prop["$ref"] as? String) != nil {
@@ -39,12 +44,16 @@ public enum JSONType: String {
             let nonNullTypes = types.filter { $0 != "null" }
             let nullTypes = types.filter { $0 == "null" }
 
-            guard nonNullTypes.count == 1, nullTypes.count == 1 else {
+            guard nonNullTypes.count == 1, nullTypes.count <= 1 else {
                 return nil
             }
             guard let type = nonNullTypes.first else { return nil }
 
             return JSONType(rawValue: type)
+        }
+        
+        if prop["properties"] != nil {
+            return .object
         }
 
         return nil
@@ -171,6 +180,7 @@ public indirect enum Schema {
     case boolean
     case string(format: StringFormatType?)
     case oneOf(types: [Schema]) // ADT
+    case anyOf(types: [Schema]) // ADT
     case enumT(EnumType)
     case reference(with: URLSchemaReference)
 }
@@ -194,7 +204,7 @@ extension Schema : CustomDebugStringConvertible {
             return "Boolean"
         case .string:
             return "String"
-        case .oneOf(types: let types):
+        case .oneOf(types: let types), .anyOf(types: let types):
             return (["OneOf"] + types.map { value in "\t\(value.debugDescription)\n" }).reduce("", +)
         case .enumT(let enumType):
             return "Enum: \(enumType)"
@@ -239,7 +249,7 @@ extension Schema {
             return valueType?.deps() ?? []
         case .integer, .float, .boolean, .string, .enumT:
             return []
-        case .oneOf(types: let types):
+        case .oneOf(types: let types), .anyOf(types: let types):
             return types.map { type in type.deps() }.reduce([]) { $0.union($1) }
         case .reference(with: let ref):
             return [ref.url]
@@ -252,7 +262,10 @@ extension Schema {
         func propertyForType(propertyInfo: JSONObject, source: URL) -> Schema? {
             let title = propertyInfo["title"] as? String
             // Check for "type"
-            guard let propType = JSONType.typeFromProperty(prop: propertyInfo) else { return nil }
+            guard let propType = JSONType.typeFromProperty(prop: propertyInfo) else {
+                print(propertyInfo)
+                return nil
+            }
 
             switch propType {
             case JSONType.string:
@@ -358,6 +371,15 @@ extension Schema {
                         build.flatMap { (bld: [Schema]) -> [Schema]? in tupleOption.map { bld + [$0] } }
                     }) }
                     .map { Schema.oneOf(types: $0) }
+                
+            case JSONType.anyOf:
+                return (propertyInfo["anyOf"] as? [JSONObject]) // [JSONObject]
+                .map { jsonObjs in jsonObjs.map { propertyForType(propertyInfo: $0, source: source) } } // [Schema?]?
+                .flatMap { schemas in schemas.reduce([], { (build: [Schema]?, tupleOption: Schema?) -> [Schema]? in
+                    build.flatMap { (bld: [Schema]) -> [Schema]? in tupleOption.map { bld + [$0] } }
+                }) }
+                .map { Schema.anyOf(types: $0) }
+                
             }
 
         }

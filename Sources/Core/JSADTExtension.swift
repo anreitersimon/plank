@@ -38,7 +38,7 @@ extension JSModelRenderer {
         case .string(.some(.dateTime)): return "PlankDate"
         case .string(.some), .string(.none): return "string"
         case .enumT(.string): return "" // TODO: JS: Not supported yet
-        case .oneOf(types:_):
+        case .oneOf(types:_), .anyOf(types: _):
             fatalError("Nested oneOf types are unsupported at this time. Please file an issue if you require this. \(aSchema)")
         }
     }
@@ -47,6 +47,8 @@ extension JSModelRenderer {
         return self.properties.flatMap { (param, prop) -> [JSIR.Root] in
             switch prop.schema {
             case .oneOf(types: let possibleTypes):
+                return [renderAdtTypeRoot(property: param, schemas: possibleTypes)]
+            case .anyOf(types: let possibleTypes):
                 return [renderAdtTypeRoot(property: param, schemas: possibleTypes)]
             case .array(itemType: .some(let itemType)):
                 switch itemType {

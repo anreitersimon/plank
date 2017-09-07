@@ -53,21 +53,21 @@ public struct SwiftModelRenderer: SwiftFileRenderer {
             }
         }
     }
-    
+
     func adtRootsForSchema(property: String, schemas: [SchemaObjectProperty]) -> [SwiftIR.Root] {
         let adtName = property.snakeCaseToPropertyName().uppercaseFirst
-        
+
         let values: [(caseName: String, className: String)] = schemas.map { (prop) in
-            
+
             let className = self.swiftClassFromSchema(property, prop.schema)
             return (className.snakeCaseToPropertyName(), className)
         }
-        
+
         return [SwiftIR.Root.adt(
             name: adtName,
             values: values
             )]
-        
+
     }
 
     func renderPropertyInitializer(_ parameter: Parameter, _ prop: SchemaObjectProperty) -> [String] {
@@ -140,6 +140,24 @@ public struct SwiftModelRenderer: SwiftFileRenderer {
             default: return []
             }
         }
+        
+        let pandClassDecl = properties
+            .map  { param, prop in
+                switch prop.schema {
+                case .object(let schema):
+                    SwiftIR.classDecl(
+                        name: param.snakeCaseToCamelCase(),
+                        extends: parentName,
+                        properties: [],
+                        protocols: protocols,
+                        enumRoots: enumRoots,
+                        adtRoots: adtRoots
+                        
+                    )
+                    
+                }
+            SwiftIR.Property(param, swiftClassFromSchema(param, prop.schema), prop) },
+            }
 
         return [
                 SwiftIR.Root.imports,

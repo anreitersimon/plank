@@ -61,12 +61,12 @@ let objectiveCReservedWordReplacements = [
 extension String {
     /// All components separated by _ will be capitalized including the first one
     func snakeCaseToCamelCase() -> String {
-        var str: String = self
+        var str: String = self.replacingOccurrences(of: " ", with: "")
 
         if let replacementString = objectiveCReservedWordReplacements[self] as String? {
             str = replacementString
         }
-
+        
         let components = str.components(separatedBy: "_")
         let name = components.map { return $0.uppercaseFirst }
         return name.joined(separator: "")

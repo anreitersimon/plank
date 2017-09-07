@@ -65,7 +65,7 @@ struct ObjCADTRenderer: ObjCFileRenderer {
         case .string(.some(.dateTime)): return "Date"
         case .string(.some), .string(.none): return "String"
         case .enumT(.string): return "StringEnum" // TODO: Allow custom names
-        case .oneOf(types:_):
+        case .oneOf(types:_), .anyOf(types:_):
             fatalError("Nested oneOf types are unsupported at this time. Please file an issue if you require this. \(aSchema)")
         }
     }
@@ -158,7 +158,7 @@ struct ObjCADTRenderer: ObjCFileRenderer {
                                 return ObjCIR.caseStmt(self.internalTypeEnumName + ObjCADTRenderer.objectName(schemaObj.schema)) {[
                                     ObjCIR.stmt("return "+enumToStringMethodName(propertyName: self.internalTypeEnumName, className: self.className))
                                     ]}
-                            case .oneOf(types:_):
+                            case .oneOf(types:_), .anyOf(types:_):
                                 //error
                                 fatalError("Nested oneOf types are unsupported at this time. Please file an issue if you require this. \(schemaObj.schema)")
                             }

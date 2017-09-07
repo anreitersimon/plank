@@ -90,6 +90,8 @@ extension SwiftFileRenderer {
         case .enumT:
             return swiftEnumTypeName(propertyName: param, className: className)
         case .object(let objSchemaRoot):
+            print("OBJNAME: \(objSchemaRoot.typeIdentifier)")
+            
             return "\(objSchemaRoot.className(with: params))"
         case .reference(with: let ref):
             switch ref.force() {
@@ -98,7 +100,7 @@ extension SwiftFileRenderer {
             default:
                 fatalError("Bad reference found in schema for class: \(className)")
             }
-        case .oneOf(types:_):
+        case .oneOf(types:_), .anyOf(types:_):
             return "\(className)\(param.snakeCaseToCamelCase())"
         }
     }

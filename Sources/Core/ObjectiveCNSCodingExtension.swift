@@ -100,7 +100,7 @@ extension ObjCFileRenderer {
             default:
                 fatalError("Bad reference found in schema for class: \(self.className)")
             }
-        case .oneOf(types: let schemaTypes):
+        case .oneOf(types: let schemaTypes), .anyOf(types: let schemaTypes):
             return schemaTypes.map(referencedObjectClasses).reduce(Set(), { set1, set2 in set1.union(set2) })
         }
     }
@@ -116,7 +116,7 @@ extension ObjCFileRenderer {
             return "[aDecoder decodeDoubleForKey:\(param.objcLiteral())];"
         case .integer:
             return "[aDecoder decodeIntegerForKey:\(param.objcLiteral())];"
-        case .string, .map, .array, .oneOf, .reference, .object:
+        case .string, .map, .array, .oneOf, .anyOf, .reference, .object:
             let refObjectClasses = referencedObjectClasses(schema).map { "[\($0) class]" }
             let refObjectClassesString = refObjectClasses.count == 1 ? refObjectClasses.joined(separator: ",") : "[NSSet setWithArray:\(refObjectClasses.objcLiteral())]"
             if refObjectClasses.count == 0 { fatalError("Can't determine class for decode for \(schema)") }
@@ -140,7 +140,7 @@ extension ObjCFileRenderer {
             return "[aCoder encodeDouble:\(propGetter) forKey:\(param.objcLiteral())];"
         case .integer:
             return "[aCoder encodeInteger:\(propGetter) forKey:\(param.objcLiteral())];"
-        case .string, .map, .array, .oneOf, .reference, .object:
+        case .string, .map, .array, .oneOf, .anyOf, .reference, .object:
             return "[aCoder encodeObject:\(propGetter) forKey:\(param.objcLiteral())];"
         }
     }

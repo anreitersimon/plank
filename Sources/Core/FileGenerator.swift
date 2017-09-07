@@ -18,6 +18,7 @@ public enum GenerationParameterType {
     case recursive
     case includeRuntime
     case indent
+    case schemaType
 }
 
 public enum Languages: String {
@@ -135,12 +136,23 @@ public func writeFile(file: FileGenerator, outputDirectory: URL, generationParam
     }
 }
 
-public func loadSchemasForUrls(urls: Set<URL>) -> [(URL, Schema)] {
-    return urls.map { ($0, FileSchemaLoader.sharedInstance.loadSchema($0)) }
+func loadSchemasForUrls(urls: Set<URL>, schemaLoader: SchemaLoader) -> [(URL, Schema)] {
+    return urls.map { ($0, schemaLoader.loadSchema($0)) }
 }
 
-public func generateDeps(urls: Set<URL>) {
-    let urlSchemas = loadSchemasForUrls(urls: urls)
+
+func schemaLoader(urls: Set<URL>, generationParameters: GenerationParameters) -> SchemaLoader {
+    if generationParameters[.schemaType] == "swagger" {
+        return SwaggerSchemaLoader(rootUrl: urls.first!)
+    } else {
+        return FileSchemaLoader.sharedInstance
+    }
+}
+
+public func generateDeps(urls: Set<URL>, generationParameters: GenerationParameters) {
+    let loader = schemaLoader(urls: urls, generationParameters: generationParameters)
+    
+    let urlSchemas = loadSchemasForUrls(urls: urls, schemaLoader: loader)
     let deps = Set(urlSchemas.map { (url, schema) -> String in
         ([url] + schema.deps()).map { $0.path }.joined(separator: ":")
     })
@@ -151,14 +163,20 @@ public func generateDeps(urls: Set<URL>) {
 
 public func generateFiles(urls: Set<URL>, outputDirectory: URL, generationParameters: GenerationParameters, forLanguages languages: [Languages]) {
     let fileGenerators: [FileGeneratorManager] = languages.map(generator)
-    _ = loadSchemasForUrls(urls: urls)
+
     var processedSchemas = Set<URL>([])
+    
+    let loader = schemaLoader(urls: urls, generationParameters: generationParameters)
+    
     repeat {
-        _ = FileSchemaLoader.sharedInstance.refs.map({ (url: URL, schema: Schema) -> Void in
+        _ = loader.refUrls.map({ (url: URL) -> Void in
             if processedSchemas.contains(url) {
                 return
             }
             processedSchemas.insert(url)
+            
+            let schema = loader.loadSchema(url)
+            
             switch schema {
             case .object(let rootObject):
                 fileGenerators.forEach { generator in
@@ -166,13 +184,20 @@ public func generateFiles(urls: Set<URL>, outputDirectory: URL, generationParame
                                            outputDirectory: outputDirectory,
                                            generationParameters: generationParameters)
                 }
+                
+//            case .anyOf:
+//                fileGenerators.forEach { generator in
+//                    generator.generateFile(rootObject,
+                
+                
             default:
-                assert(false, "Incorrect Schema for root.") // TODO Better error message.
+                break
+//                assert(false, "Incorrect Schema for root.") // TODO Better error message.
             }
         })
     } while (
         generationParameters[.recursive] != nil &&
-        processedSchemas.count != FileSchemaLoader.sharedInstance.refs.keys.count)
+        processedSchemas.count != loader.refUrls.count)
     if generationParameters[.includeRuntime] != nil {
         fileGenerators.forEach {
             $0.generateFileRuntime(outputDirectory: outputDirectory, generationParameters: generationParameters)

@@ -67,7 +67,7 @@ extension ObjCFileRenderer {
             return propIVarName
         case .object:
             return propIVarName
-        case .oneOf(types: _):
+        case .oneOf(types: _), .anyOf(types: _):
             return propIVarName
         case .reference(with: let ref):
             switch ref.force() {

@@ -293,7 +293,7 @@ public struct SwiftIR {
                         return options.map { "case \($0.defaultValue.snakeCaseToPropertyName()) = \($0.defaultValue.swiftLiteral())" }
                     }
                     }]
-                
+
             case .adt(name: let name, values: let values):
                 return [
                     SwiftIR.enumStmt("\(name)") {

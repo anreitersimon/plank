@@ -69,7 +69,7 @@ extension ObjCFileRenderer {
                  .string(format: .some(.ipv4)),
                  .string(format: .some(.ipv6)):
                 return ObjCIR.msg("_\(param)", ("isEqualToString", "anObject.\(param)"))
-            case .oneOf(types:_), .object, .array, .string(format: .some(.uri)):
+            case .oneOf(types:_), .anyOf(types:_), .object, .array, .string(format: .some(.uri)):
                 return ObjCIR.msg("_\(param)", ("isEqual", "anObject.\(param)"))
             case .reference(with: let ref):
                 switch ref.force() {

@@ -206,7 +206,7 @@ extension ObjCModelRenderer {
                         return ObjCIR.ifStmt("[\(rawObjectName) isKindOfClass:[NSString class]]") {
                             return transformToADTInit(renderPropertyInit(propertyToAssign, rawObjectName, schema: schema, firstName: firstName, counter: counter))
                         }
-                    case .oneOf(types:_):
+                    case .oneOf(types:_), .anyOf(types:_):
                         fatalError("Nested oneOf types are unsupported at this time. Please file an issue if you require this.")
                     }
                 }

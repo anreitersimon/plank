@@ -21,6 +21,7 @@ enum FlagOptions: String {
     case onlyRuntime = "only_runtime"
     case indent = "indent"
     case lang = "lang"
+    case schemaType = "schema_type"
     case help = "help"
 
     func needsArgument() -> Bool {
@@ -32,6 +33,7 @@ enum FlagOptions: String {
         case .noRecursive: return false
         case .onlyRuntime: return false
         case .lang: return true
+        case .schemaType: return true
         case .help: return false
         }
     }
@@ -47,6 +49,7 @@ extension FlagOptions : HelpCommandOutput {
             "    --\(FlagOptions.onlyRuntime.rawValue) - Only generate runtime files and exit.",
             "    --\(FlagOptions.indent.rawValue) - Define a custom indentation.",
             "    --\(FlagOptions.lang.rawValue) - Comma separated list of target language(s) for generating code. Default: \"objc\"",
+            "    --\(FlagOptions.schemaType.rawValue) - type of schema specification Default: \"swagger\"",
             "    --\(FlagOptions.help.rawValue) - Show this text and exit."
         ].joined(separator: "\n")
     }
@@ -127,12 +130,14 @@ func handleGenerateCommand(withArguments arguments: [String]) {
     let classPrefix: String? = flags[.objectiveCClassPrefix]
     let includeRuntime: String? = flags[.onlyRuntime] != nil || flags[.noRecursive] == nil ? .some("") : .none
     let indent: String? = flags[.indent]
+    let schemaType: String? = flags[.schemaType]
 
     let generationParameters: GenerationParameters = [
         (.recursive, recursive),
         (.classPrefix, classPrefix),
         (.includeRuntime, includeRuntime),
-        (.indent, indent)
+        (.indent, indent),
+        (.schemaType, schemaType)
     ].reduce([:]) { (dict: GenerationParameters, tuple: (GenerationParameterType, String?)) in
             var d = dict
             if let v = tuple.1 {
@@ -178,7 +183,8 @@ func handleGenerateCommand(withArguments arguments: [String]) {
     }
 
     if flags[.printDeps] != nil {
-        generateDeps(urls: Set(urls))
+        generateDeps(urls: Set(urls),
+                     generationParameters: generationParameters)
     } else if flags[.onlyRuntime] != nil {
         generateRuntimeFiles(outputDirectory: outputDirectory,
                              generationParameters: generationParameters,

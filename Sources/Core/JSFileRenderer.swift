@@ -105,7 +105,7 @@ extension JSFileRenderer {
             default:
                 fatalError("Bad reference found in schema for class: \(className)")
             }
-        case .oneOf(types:_):
+        case .oneOf(types:_), .anyOf(types:_):
             return JSModelRenderer.adtVariantTypeName(className: className, property: param)
         }
     }
